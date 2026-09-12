@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,400;0,700;1,400&display=swap");
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #171717;
+  --guest-navy: #1c274c;
+  --guest-navy-dark: #141b38;
+  --guest-ink: #1a1a1a;
+  --guest-muted: #6b6b6b;
+  --guest-border: #dcdcdc;
+  --guest-band: #f4f4f4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-guest-navy: var(--guest-navy);
+  --color-guest-navy-dark: var(--guest-navy-dark);
+  --color-guest-ink: var(--guest-ink);
+  --color-guest-muted: var(--guest-muted);
+  --color-guest-border: var(--guest-border);
+  --color-guest-band: var(--guest-band);
+  --font-serif: "Inria Serif", Georgia, serif;
+  --font-sans: "Inria Serif", system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.guest-btn {
+  transition: transform 150ms ease, filter 150ms ease;
+}
+.guest-btn:hover {
+  filter: brightness(1.08);
+}
+.guest-btn:active {
+  transform: scale(0.96);
+}
