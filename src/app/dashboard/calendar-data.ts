@@ -9,6 +9,13 @@ export const ROOM_COLORS: Record<string, string> = {
 };
 export const FALLBACK_COLOR = "bg-guest-band text-guest-ink";
 
+export const DOT_COLORS: Record<string, string> = {
+  "2-Bedroom Unit": "#5b6bb8",
+  "Studio Unit A": "#1e7d3c",
+  "Studio Unit B": "#a15c00",
+};
+export const DOT_FALLBACK = "#8a8a8a";
+
 export function parseMonthParam(
   month: string | undefined
 ): { year: number; monthIndex: number } {

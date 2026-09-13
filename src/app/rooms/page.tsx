@@ -1,7 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
+import { ROOM_COVER_PHOTOS } from "@/lib/room-photos";
 import { getRooms } from "../guest-actions";
 import { GuestFooter } from "../guest-footer";
 import { ChatWidget } from "../chat-widget";
@@ -34,23 +36,36 @@ export default async function RoomsPage() {
           </p>
         ) : (
           <div className="mx-auto mb-16 grid max-w-[900px] grid-cols-1 gap-x-10 gap-y-8 px-6 sm:grid-cols-2">
-            {rooms.map((room) => (
-              <Link
-                key={room.id}
-                href={`/rooms/${slugify(room.label)}`}
-                className="guest-btn text-guest-ink"
-              >
-                <div className="h-[170px] w-full rounded-none border border-guest-border bg-guest-band" />
-                <div className="mt-2.5 flex items-baseline justify-between">
-                  <span className="text-[13px] font-semibold">
-                    {room.label}
-                  </span>
-                  <span className="text-[11px] text-guest-muted">
-                    ₱{room.nightly_rate_php}/night
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {rooms.map((room) => {
+              const coverPhoto = ROOM_COVER_PHOTOS[room.label];
+              return (
+                <Link
+                  key={room.id}
+                  href={`/rooms/${slugify(room.label)}`}
+                  className="guest-btn text-guest-ink"
+                >
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-none border border-guest-border bg-guest-band">
+                    {coverPhoto && (
+                      <Image
+                        src={coverPhoto}
+                        alt={room.label}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 450px"
+                      />
+                    )}
+                  </div>
+                  <div className="mt-2.5 flex items-baseline justify-between">
+                    <span className="text-[13px] font-semibold">
+                      {room.label}
+                    </span>
+                    <span className="text-[11px] text-guest-muted">
+                      ₱{room.nightly_rate_php}/night
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </main>

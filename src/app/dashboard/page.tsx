@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
           {isOwner && (
-            <>
+            <div className="hidden items-center gap-5 lg:flex">
               <Link href="/dashboard/records" className="text-[#4a4a4a]">
                 Records
               </Link>
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
                 Reports
               </Link>
               <div className="h-5 w-px bg-[#ececec]" />
-            </>
+            </div>
           )}
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}

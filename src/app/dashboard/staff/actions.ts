@@ -9,6 +9,8 @@ export type CreateStaffState = {
   success: { fullName: string; email: string; tempPassword: string } | null;
 };
 
+export type StaffActionResult = { error: string | null };
+
 export async function createStaffAccount(
   _prevState: CreateStaffState,
   formData: FormData
@@ -60,4 +62,94 @@ export async function createStaffAccount(
     error: null,
     success: { fullName, email, tempPassword },
   };
+}
+
+export async function deactivateStaffAccount(
+  targetUserId: string
+): Promise<StaffActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not signed in." };
+  }
+
+  const { data: callerProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (callerProfile?.role !== "owner") {
+    return { error: "Only the Owner can deactivate a staff account." };
+  }
+
+  const { error: dbError } = await supabase.rpc("deactivate_staff", {
+    p_user_id: targetUserId,
+  });
+
+  if (dbError) {
+    return { error: dbError.message };
+  }
+
+  const admin = createAdminClient();
+  const { error: banError } = await admin.auth.admin.updateUserById(
+    targetUserId,
+    { ban_duration: "876000h" } // ~100 years — effectively permanent until explicitly reactivated
+  );
+
+  if (banError) {
+    return { error: banError.message };
+  }
+
+  revalidatePath("/dashboard/staff");
+  return { error: null };
+}
+
+export async function reactivateStaffAccount(
+  targetUserId: string
+): Promise<StaffActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not signed in." };
+  }
+
+  const { data: callerProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (callerProfile?.role !== "owner") {
+    return { error: "Only the Owner can reactivate a staff account." };
+  }
+
+  const { error: dbError } = await supabase.rpc("reactivate_staff", {
+    p_user_id: targetUserId,
+  });
+
+  if (dbError) {
+    return { error: dbError.message };
+  }
+
+  const admin = createAdminClient();
+  const { error: unbanError } = await admin.auth.admin.updateUserById(
+    targetUserId,
+    { ban_duration: "none" }
+  );
+
+  if (unbanError) {
+    return { error: unbanError.message };
+  }
+
+  revalidatePath("/dashboard/staff");
+  return { error: null };
 }

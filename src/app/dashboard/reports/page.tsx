@@ -5,7 +5,6 @@ import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 import { StatsChat } from "./stats-chat";
 
-
 type BookingRow = {
   final_total_php: number | null;
   payment_verified: boolean;
@@ -145,11 +144,13 @@ export default async function ReportsPage() {
       <div className="mb-7 flex items-center gap-4">
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
-          <Link href="/dashboard/records" className="text-[#4a4a4a]">
-            Records
-          </Link>
-          <span className="font-semibold text-guest-navy">Reports</span>
-          <div className="h-5 w-px bg-[#ececec]" />
+          <div className="hidden items-center gap-5 lg:flex">
+            <Link href="/dashboard/records" className="text-[#4a4a4a]">
+              Records
+            </Link>
+            <span className="font-semibold text-guest-navy">Reports</span>
+            <div className="h-5 w-px bg-[#ececec]" />
+          </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
             role="Owner"

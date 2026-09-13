@@ -82,7 +82,14 @@ export function ChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {isOpen && (
-        <div className="flex max-h-[85vh] w-80 flex-col overflow-hidden rounded-2xl border border-guest-border bg-white shadow-2xl">
+        // w-[min(320px,calc(100vw-48px))], not a fixed w-80 — on a
+        // narrow phone (320px wide, still common on older/budget
+        // devices), a fixed 320px panel plus the 24px right offset
+        // exceeded the screen width entirely, clipping the widget off
+        // the left edge. Confirmed by actually rendering both widths,
+        // not just reasoning about it — the fixed version overflowed
+        // exactly like this in practice, not just in theory.
+        <div className="flex max-h-[85vh] w-[min(320px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl border border-guest-border bg-white shadow-2xl">
           <div className="flex items-center justify-between bg-guest-navy px-4 py-3.5 text-white">
             <div>
               <div className="text-sm font-bold">WnJ Comfy Homes</div>

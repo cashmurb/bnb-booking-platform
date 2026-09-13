@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 import { AddStaffForm } from "./add-staff-form";
+import { StaffStatusButton } from "./staff-status-button";
 
 export default async function StaffPage() {
   const supabase = await createClient();
@@ -28,7 +29,7 @@ export default async function StaffPage() {
 
   const { data: accounts } = await supabase
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name, role, is_active")
     .order("role");
 
   return (
@@ -36,13 +37,15 @@ export default async function StaffPage() {
       <div className="mb-7 flex items-center gap-4">
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
-          <Link href="/dashboard/records" className="text-[#4a4a4a]">
-            Records
-          </Link>
-          <Link href="/dashboard/reports" className="text-[#4a4a4a]">
-            Reports
-          </Link>
-          <div className="h-5 w-px bg-[#ececec]" />
+          <div className="hidden items-center gap-5 lg:flex">
+            <Link href="/dashboard/records" className="text-[#4a4a4a]">
+              Records
+            </Link>
+            <Link href="/dashboard/reports" className="text-[#4a4a4a]">
+              Reports
+            </Link>
+            <div className="h-5 w-px bg-[#ececec]" />
+          </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
             role="Owner"
@@ -61,19 +64,37 @@ export default async function StaffPage() {
       </div>
 
       <div className="overflow-hidden rounded-[14px] bg-white">
-        <div className="grid grid-cols-[1.5fr_1fr] px-5 py-3.5 text-[11px] uppercase tracking-wide text-[#8a8a8a]">
+        <div className="grid grid-cols-[1.2fr_0.8fr_1fr] px-5 py-3.5 text-[11px] uppercase tracking-wide text-[#8a8a8a]">
           <span>Name</span>
           <span>Role</span>
+          <span>Status</span>
         </div>
         {(accounts ?? []).map((a) => (
           <div
             key={a.id}
-            className="grid grid-cols-[1.5fr_1fr] items-center border-t border-[#ececec] px-5 py-3.5 text-[13px]"
+            className="grid grid-cols-[1.2fr_0.8fr_1fr] items-center border-t border-[#ececec] px-5 py-3.5 text-[13px]"
           >
             <span className="font-semibold text-guest-ink">
               {a.full_name}
             </span>
             <span className="capitalize text-guest-ink">{a.role}</span>
+            <div className="flex items-center gap-3">
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] ${
+                  a.is_active
+                    ? "bg-[#e6f4ea] text-[#1e7d3c]"
+                    : "bg-[#f0f0f2] text-[#8a8a8a]"
+                }`}
+              >
+                {a.is_active ? "Active" : "Inactive"}
+              </span>
+              {a.role !== "owner" && (
+                <StaffStatusButton
+                  userId={a.id}
+                  mode={a.is_active ? "deactivate" : "reactivate"}
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>

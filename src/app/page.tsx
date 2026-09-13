@@ -6,6 +6,26 @@ import { slugify } from "@/lib/slugify";
 import { getRooms } from "./guest-actions";
 import { GuestFooter } from "./guest-footer";
 import { ChatWidget } from "./chat-widget";
+import { Slideshow } from "./slideshow";
+
+function roomPhotoPaths(folder: string, count: number): string[] {
+  return Array.from({ length: count }, (_, i) =>
+    `/images/rooms/${folder}/${String(i + 1).padStart(2, "0")}.jpg`
+  );
+}
+
+const ROOM_PHOTO_PATHS: Record<string, string[]> = {
+  "2-Bedroom Unit": roomPhotoPaths("2-bedroom", 15),
+  "Studio Unit A": roomPhotoPaths("studio-a", 18),
+  "Studio Unit B": roomPhotoPaths("studio-b", 8),
+};
+
+const HERO_PHOTOS = [
+  "/images/rooms/2-bedroom/01.jpg",
+  "/images/rooms/studio-a/01.jpg",
+  "/images/rooms/studio-b/01.jpg",
+  "/images/rooms/2-bedroom/14.jpg",
+];
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -56,31 +76,41 @@ export default async function HomePage() {
         </header>
 
         <div className="mx-auto mb-20 max-w-[1104px] px-6">
-          <div className="h-[420px] w-full rounded-md border border-guest-border bg-guest-band" />
+          <div className="h-[420px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
+            <Slideshow images={HERO_PHOTOS} alt="WnJ Comfy Homes" priority />
+          </div>
         </div>
 
         {rooms.length > 0 && (
           <div className="mx-auto max-w-[1104px] px-6">
-            {rooms.map((room, i) => (
-              <section
-                key={room.id}
-                className={`mb-16 grid grid-cols-1 items-center gap-10 sm:grid-cols-2 ${
-                  i === rooms.length - 1 ? "mb-20" : ""
-                }`}
-              >
-                {i % 2 === 1 ? (
-                  <>
-                    <div className="h-[280px] w-full rounded-md border border-guest-border bg-guest-band" />
-                    <RoomBlurb room={room} />
-                  </>
-                ) : (
-                  <>
-                    <RoomBlurb room={room} />
-                    <div className="h-[280px] w-full rounded-md border border-guest-border bg-guest-band" />
-                  </>
-                )}
-              </section>
-            ))}
+            {rooms.map((room, i) => {
+              const photos = ROOM_PHOTO_PATHS[room.label] ?? [];
+              const image = (
+                <div className="h-[280px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
+                  <Slideshow images={photos} alt={room.label} />
+                </div>
+              );
+              return (
+                <section
+                  key={room.id}
+                  className={`mb-16 grid grid-cols-1 items-center gap-10 sm:grid-cols-2 ${
+                    i === rooms.length - 1 ? "mb-20" : ""
+                  }`}
+                >
+                  {i % 2 === 1 ? (
+                    <>
+                      {image}
+                      <RoomBlurb room={room} />
+                    </>
+                  ) : (
+                    <>
+                      <RoomBlurb room={room} />
+                      {image}
+                    </>
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
 

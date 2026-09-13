@@ -140,7 +140,7 @@ export default async function BookingDetailPage({
 
       <div className="mb-5 rounded-[14px] bg-white p-6">
         <h3 className="mb-4 text-base font-normal text-guest-ink">Guest</h3>
-        <div className="grid grid-cols-2 gap-3.5 text-[13px]">
+        <div className="grid grid-cols-1 gap-3.5 text-[13px] sm:grid-cols-2">
           <div>
             <div className="mb-1 text-guest-muted">Name</div>
             <div className="font-semibold">{booking.guest_name}</div>
@@ -162,7 +162,7 @@ export default async function BookingDetailPage({
 
       <div className="mb-5 rounded-[14px] bg-white p-6">
         <h3 className="mb-4 text-base font-normal text-guest-ink">Stay</h3>
-        <div className="grid grid-cols-2 gap-3.5 text-[13px]">
+        <div className="grid grid-cols-1 gap-3.5 text-[13px] sm:grid-cols-2">
           <div>
             <div className="mb-1 text-guest-muted">Property</div>
             <div className="font-semibold">{room?.label ?? "—"}</div>

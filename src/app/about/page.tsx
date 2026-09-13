@@ -38,9 +38,8 @@ export default async function AboutPage() {
             Our Story
           </h2>
           <p className="text-[13px] leading-relaxed text-guest-muted">
-            WnJ Comfy Homes started with a single studio unit, built on a simple idea: give travelers a clean, well-located place
-            to stay without the fuss of a hotel. Today we manage a small portfolio of studio and family units on Mactan
-            Island, each one personally maintained by our team.
+            WnJ Comfy Homes started with a simple idea: give travelers a clean, well-located place to stay while enjoying the comfort and convenience of a home. 
+            We began with three comfy homes, and today, we continue to provide a welcoming experience for guests from around the world, letting you enjoy Cebu to the fullest, just like a local.
           </p>
         </section>
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { jsPDF } from "jspdf";
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   checkOccupiedDates,
@@ -13,6 +14,7 @@ import {
 import { GuestFooter } from "../../guest-footer";
 import { ChatWidget } from "../../chat-widget";
 import { LocationPinIcon, PeopleIcon, CheckCircleIcon } from "../../icons";
+import { ROOM_PHOTOS } from "@/lib/room-photos";
 import type { Resource, GuestHold } from "@/lib/types";
 
 type Step = "details" | "review" | "success";
@@ -61,16 +63,20 @@ export function RoomBooking({ room }: { room: Resource }) {
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
   const [today, setToday] = useState<string>("");
 
-  const IMAGE_COUNT = 4;
+  const photos = ROOM_PHOTOS[room.label];
+  const IMAGE_COUNT = photos?.count ?? 0;
   const [imageIndex, setImageIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
-  function prevImage() {
+  const prevImage = useCallback(() => {
+    if (IMAGE_COUNT === 0) return;
     setImageIndex((i) => (i - 1 + IMAGE_COUNT) % IMAGE_COUNT);
-  }
-  function nextImage() {
+  }, [IMAGE_COUNT]);
+  const nextImage = useCallback(() => {
+    if (IMAGE_COUNT === 0) return;
     setImageIndex((i) => (i + 1) % IMAGE_COUNT);
-  }
+  }, [IMAGE_COUNT]);
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
   }
@@ -128,6 +134,17 @@ export function RoomBooking({ room }: { room: Resource }) {
       clearInterval(intervalId);
     };
   }, [hold?.holdExpiresAt]);
+
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      else if (e.key === "ArrowLeft") prevImage();
+      else if (e.key === "ArrowRight") nextImage();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isLightboxOpen, prevImage, nextImage]);
 
   const canReserve =
     !!startDate &&
@@ -429,7 +446,7 @@ export function RoomBooking({ room }: { room: Resource }) {
               <h2 className="mb-3 mt-6 font-serif text-lg text-guest-ink">
                 Payment Method
               </h2>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
                 {(
                   [
                     { key: "card", label: "Credit/Debit Card" },
@@ -534,41 +551,67 @@ export function RoomBooking({ room }: { room: Resource }) {
         </Link>
 
         <div
-          className="relative mb-8 mt-4 flex h-[300px] w-full items-center justify-center rounded-md border border-guest-border bg-guest-band"
+          className="relative mb-8 mt-4 h-[300px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          <span className="text-xs text-guest-muted">
-            Photo {imageIndex + 1} of {IMAGE_COUNT}
-          </span>
-
-          <button
-            type="button"
-            onClick={prevImage}
-            aria-label="Previous photo"
-            className="guest-btn absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-guest-ink shadow"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={nextImage}
-            aria-label="Next photo"
-            className="guest-btn absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-guest-ink shadow"
-          >
-            ›
-          </button>
-
-          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-            {Array.from({ length: IMAGE_COUNT }).map((_, i) => (
-              <span
-                key={i}
-                className={`h-1.5 w-1.5 rounded-full ${
-                  i === imageIndex ? "bg-guest-navy" : "bg-white/70"
-                }`}
+          {photos ? (
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(true)}
+              aria-label="View full-size photo"
+              className="group relative h-full w-full cursor-zoom-in"
+            >
+              <Image
+                src={`/images/rooms/${photos.folder}/${String(imageIndex + 1).padStart(2, "0")}.jpg`}
+                alt={`${room.label} photo ${imageIndex + 1}`}
+                fill
+                className="object-cover"
+                priority={imageIndex === 0}
               />
-            ))}
-          </div>
+              <span className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                View full size
+              </span>
+            </button>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <span className="text-xs text-guest-muted">
+                Photos coming soon
+              </span>
+            </div>
+          )}
+
+          {IMAGE_COUNT > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevImage}
+                aria-label="Previous photo"
+                className="guest-btn absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-guest-ink shadow"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={nextImage}
+                aria-label="Next photo"
+                className="guest-btn absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-guest-ink shadow"
+              >
+                ›
+              </button>
+
+              <div className="absolute bottom-3 left-1/2 flex max-w-[85%] -translate-x-1/2 flex-wrap justify-center gap-1.5">
+                {Array.from({ length: IMAGE_COUNT }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 w-1.5 flex-none rounded-full ${
+                      i === imageIndex ? "bg-guest-navy" : "bg-white/70"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
@@ -647,8 +690,6 @@ export function RoomBooking({ room }: { room: Resource }) {
             </div>
           </div>
 
-          {/* Right: the booking form — same fields, same logic as
-              before, laid out as a sidebar card matching the design. */}
           <aside className="h-fit rounded border border-guest-border p-6">
             <h2 className="mb-5 text-[16px] font-normal text-guest-ink">
               {step === "review" ? "Review & Confirm" : "Book Room"}
@@ -784,6 +825,64 @@ export function RoomBooking({ room }: { room: Resource }) {
 
       <GuestFooter maxWidthClassName="max-w-[900px]" />
       <ChatWidget />
+
+      {isLightboxOpen && photos && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setIsLightboxOpen(false)}
+            aria-label="Close full-size photo"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-2xl text-white hover:bg-white/20"
+          >
+            ×
+          </button>
+
+          <div
+            className="relative h-[85vh] w-[90vw]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={`/images/rooms/${photos.folder}/${String(imageIndex + 1).padStart(2, "0")}.jpg`}
+              alt={`${room.label} photo ${imageIndex + 1}, full size`}
+              fill
+              className="object-contain"
+            />
+          </div>
+
+          {IMAGE_COUNT > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevImage();
+                }}
+                aria-label="Previous photo"
+                className="absolute left-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-xl text-white hover:bg-white/20"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage();
+                }}
+                aria-label="Next photo"
+                className="absolute right-4 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-xl text-white hover:bg-white/20"
+              >
+                ›
+              </button>
+              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-white/70">
+                {imageIndex + 1} / {IMAGE_COUNT}
+              </span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

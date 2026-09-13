@@ -6,6 +6,8 @@ import { ProfileMenu } from "../profile-menu";
 import {
   ROOM_COLORS,
   FALLBACK_COLOR,
+  DOT_COLORS,
+  DOT_FALLBACK,
   parseMonthParam,
   monthParamString,
   getCalendarData,
@@ -55,13 +57,15 @@ export default async function CalendarPage({
       <div className="mb-7 flex items-center gap-4">
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
-          <Link href="/dashboard/records" className="text-[#4a4a4a]">
-            Records
-          </Link>
-          <Link href="/dashboard/reports" className="text-[#4a4a4a]">
-            Reports
-          </Link>
-          <div className="h-5 w-px bg-[#ececec]" />
+          <div className="hidden items-center gap-5 lg:flex">
+            <Link href="/dashboard/records" className="text-[#4a4a4a]">
+              Records
+            </Link>
+            <Link href="/dashboard/reports" className="text-[#4a4a4a]">
+              Reports
+            </Link>
+            <div className="h-5 w-px bg-[#ececec]" />
+          </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
             role="Owner"
@@ -115,30 +119,50 @@ export default async function CalendarPage({
           ))}
         </div>
         <div className="grid grid-cols-7">
-          {cells.map((cell, i) => (
-            <div
-              key={i}
-              className="min-h-[96px] border-b border-r border-[#ececec] p-2"
-            >
-              {cell.day && (
-                <>
-                  <span className="text-xs text-guest-ink">{cell.day}</span>
-                  <div className="mt-1 flex flex-col gap-1">
-                    {(byDate.get(cell.date!) ?? []).slice(0, 3).map((b, idx) => (
-                      <span
-                        key={idx}
-                        className={`truncate rounded px-1.5 py-0.5 text-[10px] ${
-                          ROOM_COLORS[b.label] ?? FALLBACK_COLOR
-                        }`}
-                      >
-                        {b.label}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+          {cells.map((cell, i) => {
+            const bookingsToday = cell.date ? (byDate.get(cell.date) ?? []) : [];
+            return (
+              <div
+                key={i}
+                className="min-h-[56px] border-b border-r border-[#ececec] p-2 lg:min-h-[96px]"
+              >
+                {cell.day && (
+                  <>
+                    <span className="text-xs text-guest-ink">{cell.day}</span>
+
+                    {/* Desktop: full room-name chips, unchanged */}
+                    <div className="mt-1 hidden flex-col gap-1 lg:flex">
+                      {bookingsToday.slice(0, 3).map((b, idx) => (
+                        <span
+                          key={idx}
+                          className={`truncate rounded px-1.5 py-0.5 text-[10px] ${
+                            ROOM_COLORS[b.label] ?? FALLBACK_COLOR
+                          }`}
+                        >
+                          {b.label}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    {bookingsToday.length > 0 && (
+                      <div className="mt-1 flex gap-0.5 lg:hidden">
+                        {bookingsToday.slice(0, 3).map((b, idx) => (
+                          <span
+                            key={idx}
+                            className="h-1.5 w-1.5 flex-none rounded-full"
+                            style={{
+                              backgroundColor:
+                                DOT_COLORS[b.label] ?? DOT_FALLBACK,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </main>

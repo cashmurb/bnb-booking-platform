@@ -1,14 +1,7 @@
-import { getCalendarData } from "./calendar-data";
+import { getCalendarData, DOT_COLORS, DOT_FALLBACK } from "./calendar-data";
 import type { createClient } from "@/lib/supabase/server";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
-
-const DOT_COLORS: Record<string, string> = {
-  "2-Bedroom Unit": "#5b6bb8",
-  "Studio Unit A": "#1e7d3c",
-  "Studio Unit B": "#a15c00",
-};
-const DOT_FALLBACK = "#8a8a8a";
 
 export async function MiniCalendar({
   supabase,

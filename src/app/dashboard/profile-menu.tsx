@@ -36,8 +36,8 @@ export function ProfileMenu({
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2.5"
       >
-        <div className="h-9 w-9 rounded-full bg-[#d9d9d9]" />
-        <div className="text-left">
+        <div className="h-9 w-9 flex-none rounded-full bg-[#d9d9d9]" />
+        <div className="hidden text-left lg:block">
           <div className="text-[13px] font-semibold text-guest-ink">
             {name}
           </div>
@@ -53,15 +53,31 @@ export function ProfileMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-40 overflow-hidden rounded-lg border border-guest-border bg-white shadow-lg">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-44 overflow-hidden rounded-lg border border-guest-border bg-white shadow-lg">
           {isOwner && (
-            <Link
-              href="/dashboard/staff"
-              onClick={() => setOpen(false)}
-              className="block w-full px-4 py-2.5 text-left text-sm text-guest-ink hover:bg-[#f5f5f5]"
-            >
-              Manage Staff
-            </Link>
+            <>
+              <Link
+                href="/dashboard/records"
+                onClick={() => setOpen(false)}
+                className="block w-full px-4 py-2.5 text-left text-sm text-guest-ink hover:bg-[#f5f5f5] lg:hidden"
+              >
+                Records
+              </Link>
+              <Link
+                href="/dashboard/reports"
+                onClick={() => setOpen(false)}
+                className="block w-full px-4 py-2.5 text-left text-sm text-guest-ink hover:bg-[#f5f5f5] lg:hidden"
+              >
+                Reports
+              </Link>
+              <Link
+                href="/dashboard/staff"
+                onClick={() => setOpen(false)}
+                className="block w-full px-4 py-2.5 text-left text-sm text-guest-ink hover:bg-[#f5f5f5]"
+              >
+                Manage Staff
+              </Link>
+            </>
           )}
           <form action={logout}>
             <button

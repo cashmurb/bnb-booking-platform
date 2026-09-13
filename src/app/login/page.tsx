@@ -1,11 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { login, type LoginState } from "./actions";
 import { AuthBackground } from "../auth-background";
 
 const initialState: LoginState = { error: null };
+
+function DeactivatedNotice() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("deactivated") !== "1") return null;
+
+  return (
+    <p className="mb-4 rounded-md bg-white/15 p-3 text-center text-sm text-white">
+      This account has been deactivated. Contact the Owner if you believe
+      this is a mistake.
+    </p>
+  );
+}
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
@@ -17,6 +31,10 @@ export default function LoginPage() {
           <h2 className="text-lg font-normal text-white">Login</h2>
           <p className="mt-1 text-sm text-white/60">Nice to see you again!</p>
         </div>
+
+        <Suspense fallback={null}>
+          <DeactivatedNotice />
+        </Suspense>
 
         <form action={formAction} className="space-y-4">
           <div>

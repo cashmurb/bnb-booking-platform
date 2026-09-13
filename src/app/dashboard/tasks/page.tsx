@@ -6,7 +6,6 @@ import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 import type { Task } from "@/lib/types";
 
-
 function TaskRow({ task }: { task: Task }) {
   const label =
     task.type === "cleaning" ? task.resource_label : task.driver_window_label;
@@ -50,6 +49,8 @@ export default async function TasksPage() {
 
   const isOwner = profile?.role === "owner";
 
+  // Both Owner and Staff can be here — RLS on `tasks` already allows
+  // both roles, so no role redirect needed, unlike /dashboard/bookings.
   const { data: tasks, error } = await supabase
     .from("tasks")
     .select(
@@ -67,7 +68,7 @@ export default async function TasksPage() {
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
           {isOwner && (
-            <>
+            <div className="hidden items-center gap-5 lg:flex">
               <Link href="/dashboard/records" className="text-[#4a4a4a]">
                 Records
               </Link>
@@ -75,7 +76,7 @@ export default async function TasksPage() {
                 Reports
               </Link>
               <div className="h-5 w-px bg-[#ececec]" />
-            </>
+            </div>
           )}
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}

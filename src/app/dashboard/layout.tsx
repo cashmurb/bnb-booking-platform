@@ -19,14 +19,19 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, is_active")
     .eq("id", user.id)
     .single();
+
+  if (profile?.is_active === false) {
+    await supabase.auth.signOut();
+    redirect("/login?deactivated=1");
+  }
 
   return (
     <div className="min-h-screen bg-[#f6f6f8]">
       <ManagementSidebar role={profile?.role ?? "staff"} />
-      <div className="pl-[100px]">{children}</div>
+      <div className="pb-20 lg:pb-0 lg:pl-[100px]">{children}</div>
     </div>
   );
 }

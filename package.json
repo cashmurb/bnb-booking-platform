@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "create-user": "node scripts/create-user.mjs"
+    "create-user": "node scripts/create-user.mjs",
+    "update-user": "node scripts/update-user.mjs",
+    "delete-user": "node scripts/delete-user.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

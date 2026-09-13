@@ -63,13 +63,15 @@ export default async function ArchivedBookingsPage() {
       <div className="mb-7 flex items-center gap-4">
         <SearchBar />
         <div className="ml-auto flex items-center gap-5 text-[13px]">
-          <Link href="/dashboard/records" className="text-[#4a4a4a]">
-            Records
-          </Link>
-          <Link href="/dashboard/reports" className="text-[#4a4a4a]">
-            Reports
-          </Link>
-          <div className="h-5 w-px bg-[#ececec]" />
+          <div className="hidden items-center gap-5 lg:flex">
+            <Link href="/dashboard/records" className="text-[#4a4a4a]">
+              Records
+            </Link>
+            <Link href="/dashboard/reports" className="text-[#4a4a4a]">
+              Reports
+            </Link>
+            <div className="h-5 w-px bg-[#ececec]" />
+          </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
             role="Owner"
@@ -98,7 +100,7 @@ export default async function ArchivedBookingsPage() {
       )}
 
       <div className="overflow-hidden rounded-[14px] bg-white">
-        <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto] px-5 py-3.5 text-xs text-[#4a4a4a]">
+        <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto] px-5 py-3.5 text-xs text-[#4a4a4a] lg:grid">
           <span>Guest Name</span>
           <span>Room</span>
           <span>Date</span>
@@ -114,38 +116,66 @@ export default async function ArchivedBookingsPage() {
         ) : (
           rows.map((b) => {
             const rb = b.resource_bookings[0];
-            return (
-              <div
-                key={b.id}
-                className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto] items-center border-t border-[#f0f0f2] px-5 py-3 text-[13px] text-guest-ink"
+            const statusBadge = (
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
+                  STATUS_STYLES[b.status] ?? "bg-stone-100 text-stone-600"
+                }`}
               >
-                <Link
-                  href={`/dashboard/bookings/${b.id}`}
-                  className="contents"
-                >
-                  <span className="font-medium">{b.guest_name}</span>
-                  <span className="text-guest-muted">
-                    {rb?.resources?.label ?? "—"}
-                  </span>
-                  <span className="text-guest-muted">
-                    {rb ? `${rb.start_date} → ${rb.end_date}` : "—"}
-                  </span>
-                  <span>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
-                        STATUS_STYLES[b.status] ?? "bg-stone-100 text-stone-600"
-                      }`}
-                    >
-                      {b.status}
+                {b.status}
+              </span>
+            );
+            const total =
+              b.final_total_php != null
+                ? `₱${Number(b.final_total_php).toFixed(2)}`
+                : "—";
+
+            return (
+              <div key={b.id} className="border-t border-[#f0f0f2]">
+                {/* Desktop: original table row, unchanged */}
+                <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto] items-center px-5 py-3 text-[13px] text-guest-ink lg:grid">
+                  <Link
+                    href={`/dashboard/bookings/${b.id}`}
+                    className="contents"
+                  >
+                    <span className="font-medium">{b.guest_name}</span>
+                    <span className="text-guest-muted">
+                      {rb?.resources?.label ?? "—"}
                     </span>
-                  </span>
-                  <span className="font-medium">
-                    {b.final_total_php != null
-                      ? `₱${Number(b.final_total_php).toFixed(2)}`
-                      : "—"}
-                  </span>
-                </Link>
-                <ArchiveButton bookingId={b.id} mode="unarchive" />
+                    <span className="text-guest-muted">
+                      {rb ? `${rb.start_date} → ${rb.end_date}` : "—"}
+                    </span>
+                    <span>{statusBadge}</span>
+                    <span className="font-medium">{total}</span>
+                  </Link>
+                  <ArchiveButton bookingId={b.id} mode="unarchive" />
+                </div>
+
+                {/* Mobile: same stacked-card treatment as the main
+                    Bookings list — see that page's comment for the
+                    full reasoning. */}
+                <div className="p-4 lg:hidden">
+                  <Link href={`/dashboard/bookings/${b.id}`} className="block">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-medium text-guest-ink">
+                        {b.guest_name}
+                      </span>
+                      <span className="flex-none">{statusBadge}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-guest-muted">
+                      {rb?.resources?.label ?? "—"}
+                    </p>
+                    <p className="text-xs text-guest-muted">
+                      {rb ? `${rb.start_date} → ${rb.end_date}` : "—"}
+                    </p>
+                  </Link>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-guest-ink">
+                      {total}
+                    </span>
+                    <ArchiveButton bookingId={b.id} mode="unarchive" />
+                  </div>
+                </div>
               </div>
             );
           })
