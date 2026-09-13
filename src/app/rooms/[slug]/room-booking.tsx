@@ -66,8 +66,10 @@ export function RoomBooking({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
+  const bookingReference = confirmedId
+    ? confirmedId.slice(0, 8).toUpperCase()
+    : null;
   const [today, setToday] = useState<string>("");
-
   const IMAGE_COUNT = photos.length;
   const [imageIndex, setImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -179,7 +181,6 @@ export function RoomBooking({
     setHold(result.hold);
     setStep("review");
   }
-
   const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim());
   const canConfirm = looksLikeEmail && !pending;
 
@@ -227,7 +228,7 @@ export function RoomBooking({
   }
 
   function downloadReceipt() {
-    if (!confirmedId) return;
+    if (!confirmedId || !bookingReference) return;
 
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -250,7 +251,7 @@ export function RoomBooking({
     doc.line(marginX, y, pageWidth - marginX, y);
 
     const rows: [string, string][] = [
-      ["Booking Reference", confirmedId],
+      ["Booking Reference", bookingReference],
       ["Guest", guestName],
       ["Property", room.label],
       ["Dates", `${startDate}  to  ${endDate}`],
@@ -285,7 +286,7 @@ export function RoomBooking({
       { align: "center" }
     );
 
-    doc.save(`WnJ-Receipt-${confirmedId}.pdf`);
+    doc.save(`WnJ-Receipt-${bookingReference}.pdf`);
   }
 
   if (step === "success") {
@@ -304,12 +305,12 @@ export function RoomBooking({
           </p>
 
           <div className="mb-6 flex flex-col gap-3 rounded-lg border border-guest-border p-5 text-left text-[13px]">
-            {confirmedId && (
+            {bookingReference && (
               <>
                 <div className="flex justify-between text-guest-muted">
                   <span>Booking Reference</span>
                   <span className="font-semibold text-guest-ink">
-                    {confirmedId}
+                    {bookingReference}
                   </span>
                 </div>
                 <div className="h-px bg-guest-border" />
@@ -473,8 +474,7 @@ export function RoomBooking({
                 ))}
               </div>
               <p className="mt-3 text-[11px] text-guest-muted">
-                This is a preference for now, not a live charge — no
-                payment processor is connected yet. The Owner will follow
+                This is a preference for now, not a live charge. Payment processor is connected yet. The Owner will follow
                 up on payment directly using the method you choose here.
               </p>
             </div>
@@ -619,7 +619,6 @@ export function RoomBooking({
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
-          {/* Left: room info + content sections */}
           <div>
             <div className="mb-8 rounded border border-guest-border p-5">
               <div className="mb-1.5 flex items-baseline justify-between">
@@ -693,7 +692,6 @@ export function RoomBooking({
               </div>
             </div>
           </div>
-
           <aside className="h-fit rounded border border-guest-border p-6">
             <h2 className="mb-5 text-[16px] font-normal text-guest-ink">
               {step === "review" ? "Review & Confirm" : "Book Room"}
@@ -786,7 +784,9 @@ export function RoomBooking({
                 )}
                 {hasConflict && (
                   <p className="text-sm text-red-600">
-                    Sorry, this room is already booked for those dates ({occupiedDates.join(", ")}). Select another to continue. 
+                    Sorry, this room is already booked for part of that
+                    range ({occupiedDates.join(", ")}). Try different
+                    dates.
                   </p>
                 )}
 
@@ -841,7 +841,6 @@ export function RoomBooking({
           >
             ×
           </button>
-
           <div
             className="relative h-[85vh] w-[90vw]"
             onClick={(e) => e.stopPropagation()}
