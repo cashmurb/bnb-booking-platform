@@ -48,6 +48,17 @@ as $$ select string_to_array(name, '/') $$;
 alter table storage.objects enable row level security;
 EOF
 
+psql -v ON_ERROR_STOP=1 -d "$DB" -c "
+  DO \$\$ BEGIN
+    CREATE ROLE authenticated;
+  EXCEPTION WHEN duplicate_object THEN NULL; END \$\$;
+  DO \$\$ BEGIN
+    CREATE ROLE anon;
+  EXCEPTION WHEN duplicate_object THEN NULL; END \$\$;
+  GRANT USAGE ON SCHEMA auth, public, storage TO authenticated, anon;
+  GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated, anon;
+"
+
 APPLIED_COUNT=0
 for f in "$MIGRATIONS_DIR"/*.sql; do
   if [[ "$(basename "$f")" == "0003_cron.sql" ]]; then
@@ -58,14 +69,6 @@ for f in "$MIGRATIONS_DIR"/*.sql; do
 done
 
 psql -v ON_ERROR_STOP=1 -d "$DB" -c "
-  DO \$\$ BEGIN
-    CREATE ROLE authenticated;
-  EXCEPTION WHEN duplicate_object THEN NULL; END \$\$;
-  DO \$\$ BEGIN
-    CREATE ROLE anon;
-  EXCEPTION WHEN duplicate_object THEN NULL; END \$\$;
-  GRANT USAGE ON SCHEMA auth, public, storage TO authenticated, anon;
-  GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated, anon;
   GRANT EXECUTE ON FUNCTION public.current_user_role() TO authenticated, anon;
 "
 
