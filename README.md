@@ -1,6 +1,8 @@
 # WnJ Comfy Homes
 
-A full booking website and management system for WnJ Comfy Homes & Tour Services. We are a small family-run B&B and tour business on Mactan Island, Lapu-Lapu City Philippines. One property, three rooms, built from the ground up: guests can browse and book online, and the Owner and Staff run the whole business — bookings, cleaning and driver tasks, pricing, reviews, and reports — from one private dashboard.
+A full booking website and management system for WnJ Comfy Homes & Tour Services. We are a small family-run B&B and tour business on Mactan Island, Lapu-Lapu City Philippines. 
+
+In this system, guests can browse and book online, while the Owners and Staffs run the whole business (bookings, cleaning and driver tasks, pricing, reviews, and reports) from one private dashboard.
 
 ## Built with
 
@@ -13,16 +15,16 @@ A full booking website and management system for WnJ Comfy Homes & Tour Services
 ## What guests can do
 
 - Browse the three rooms and check real-time availability
-- Book a room in three steps — pick dates, enter details, confirm — with the total calculated automatically (room rate, extra-guest fee, cleaning fee)
-- Download a real PDF receipt right after booking
-- Read the actual cancellation policy
-- Leave a review after their stay, using the reference number from their receipt — no account needed
+- Book a room in three steps. Pick dates, enter details, confirm with the total calculated automatically (room rate, extra-guest fee, cleaning fee)
+- Receive a booking confirmation email
+- Download a PDF receipt right after booking
+- Leave a review after their stay, using the reference number from their receipt
 - Ask a chat widget quick questions (parking, cancellation, etc.), or message the Owner directly on Facebook if it can't answer
 - See a real, calendar-based view of which dates are already taken
 
 ## What the Owner and Staff can do
 
-Everything below lives behind sign-in at `/login`, completely separate from the guest site — a signed-in Owner or Staff account can never see the guest pages, and a guest can never reach the dashboard.
+Everything below lives behind sign-in at `/login`, completely separate from the guest site. The signed-in Owner or Staff account can never see the guest pages, and a guest can never reach the dashboard.
 
 - **Dashboard** — a real-time overview: active bookings, upcoming check-ins, this month's occupancy, a mini calendar, upcoming tasks, and any guest reviews waiting for approval
 - **Bookings** — see every booking, open one for full details, create a booking manually (for a phone or walk-in guest), and archive old ones to keep the main list clean without deleting anything
@@ -69,6 +71,7 @@ In the Supabase dashboard: **SQL Editor → New query**. Run each file in `supab
 0021_payment_verification.sql
 0022_reviews.sql
 0023_booking_archive.sql
+
 ```
 
 For `0003`: if `create extension if not exists pg_cron;` fails, go to **Database → Extensions**, enable `pg_cron` there, then re-run just the `select cron.schedule(...)` line from that file on its own.
@@ -83,10 +86,9 @@ cp .env.example .env.local
 
 Fill in four values:
 
-- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` — from Supabase, step 1
-- `SUPABASE_SERVICE_ROLE_KEY` — also from Supabase, step 1. Used server-side only, by the Add Staff feature — never exposed to the browser
-- `GEMINI_API_KEY` — a free key from
-  [aistudio.google.com](https://aistudio.google.com/apikey), used by both the guest chat widget and the Owner's stats assistant
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` 
+- `SUPABASE_SERVICE_ROLE_KEY` 
+- `GEMINI_API_KEY` 
 
 ### 4. Install and run locally
 
@@ -108,23 +110,14 @@ npm run create-user -- owner@yourdomain.com "Owner Name" owner
 npm run create-user -- staff@yourdomain.com "Staff Name" staff
 ```
 
-Each command prints a temporary password — share it with that person directly and have them sign in once.
+Each command prints a temporary password. Share it with that person directly and have them sign in once.
 
 ## Deploying
 
 1. Push this project to a GitHub repository.
 2. In Vercel, choose **Import Git Repository** and select it.
-3. Add all four environment variables from `.env.local` in Vercel's **Settings → Environment Variables** — including `SUPABASE_SERVICE_ROLE_KEY` and `GEMINI_API_KEY`, since both are genuinely needed server-side in production, not just locally.
+3. Add all four environment variables from `.env.local` in Vercel's **Settings → Environment Variables**.
 4. Deploy.
-
-## What isn't built yet
-
-Real, known gaps — not oversights:
-
-- **Payment processing.** Nothing here actually charges a card yet. This needs a real PayMongo or Xendit merchant account first, which only the business itself can set up.
-- **Refunds.** Depends on payment processing existing first.
-- **Automated emails** — a receipt to the guest's inbox, a real password-reset email, anything sent automatically. Right now the only receipt a guest gets is the PDF they download themselves in the browser right after booking. Sending real email needs a custom domain and a transactional email provider (Resend) connected — both still pending setup.
-- **Real photography.** Every image on the guest site is a placeholder box — no actual photos of the property exist in the system yet.
 
 ## Project structure
 
