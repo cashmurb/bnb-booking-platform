@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ROOM_PHOTOS } from "@/lib/room-photos";
 import { ListingForm } from "./listing-form";
 import { PhotoCarousel } from "./photo-carousel";
 
@@ -44,29 +43,19 @@ export default async function ListingDetailPage({
     notFound();
   }
 
-  const staticPhotos = ROOM_PHOTOS[resource.label];
-
-  const { data: uploadedPhotoRows } = await supabase
+  const { data: photoRows } = await supabase
     .from("resource_photos")
     .select("id, storage_path")
     .eq("resource_id", id)
     .order("display_order", { ascending: true });
 
-  const combinedPhotos = [
-    ...(staticPhotos
-      ? Array.from({ length: staticPhotos.count }).map((_, i) => ({
-          src: `/images/rooms/${staticPhotos.folder}/${String(i + 1).padStart(2, "0")}.jpg`,
-          deletable: false as const,
-        }))
-      : []),
-    ...(uploadedPhotoRows ?? []).map((row) => ({
-      src: supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
-        .data.publicUrl,
-      deletable: true as const,
-      photoId: row.id,
-      storagePath: row.storage_path,
-    })),
-  ];
+  const photos = (photoRows ?? []).map((row) => ({
+    src: supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
+      .data.publicUrl,
+    deletable: true as const,
+    photoId: row.id,
+    storagePath: row.storage_path,
+  }));
 
   return (
     <main className="mx-auto max-w-[720px] px-10 py-6">
@@ -81,7 +70,7 @@ export default async function ListingDetailPage({
       <PhotoCarousel
         resourceId={id}
         resourceLabel={resource.label}
-        initialPhotos={combinedPhotos}
+        initialPhotos={photos}
       />
 
       <ListingForm resource={resource} />

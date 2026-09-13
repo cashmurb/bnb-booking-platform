@@ -14,7 +14,6 @@ import {
 import { GuestFooter } from "../../guest-footer";
 import { ChatWidget } from "../../chat-widget";
 import { LocationPinIcon, PeopleIcon, CheckCircleIcon } from "../../icons";
-import { ROOM_PHOTOS } from "@/lib/room-photos";
 import type { Resource, GuestHold } from "@/lib/types";
 
 type Step = "details" | "review" | "success";
@@ -39,7 +38,13 @@ function todayDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
-export function RoomBooking({ room }: { room: Resource }) {
+export function RoomBooking({
+  room,
+  photos,
+}: {
+  room: Resource;
+  photos: string[];
+}) {
   const [step, setStep] = useState<Step>("details");
 
   const [startDate, setStartDate] = useState("");
@@ -63,8 +68,7 @@ export function RoomBooking({ room }: { room: Resource }) {
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
   const [today, setToday] = useState<string>("");
 
-  const photos = ROOM_PHOTOS[room.label];
-  const IMAGE_COUNT = photos?.count ?? 0;
+  const IMAGE_COUNT = photos.length;
   const [imageIndex, setImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -551,24 +555,22 @@ export function RoomBooking({ room }: { room: Resource }) {
         </Link>
 
         <div
-          className="relative mb-8 mt-4 w-full overflow-hidden rounded-md border border-guest-border bg-guest-band"
+          className="relative mb-8 mt-4 h-[300px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {photos ? (
+          {photos.length > 0 ? (
             <button
               type="button"
               onClick={() => setIsLightboxOpen(true)}
               aria-label="View full-size photo"
-              className="group relative block h-full w-full cursor-zoom-in"
+              className="group relative h-full w-full cursor-zoom-in"
             >
               <Image
-                src={`/images/rooms/${photos.folder}/${String(imageIndex + 1).padStart(2, "0")}.jpg`}
+                src={photos[imageIndex]}
                 alt={`${room.label} photo ${imageIndex + 1}`}
-                width={0}
-                height={0}
-                sizes="(max-width: 1024px) 100vw, 900px"
-                className="h-auto max-h-[70vh] w-full object-contain"
+                fill
+                className="object-cover"
                 priority={imageIndex === 0}
               />
               <span className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -576,7 +578,7 @@ export function RoomBooking({ room }: { room: Resource }) {
               </span>
             </button>
           ) : (
-            <div className="flex aspect-video w-full items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center">
               <span className="text-xs text-guest-muted">
                 Photos coming soon
               </span>
@@ -784,9 +786,7 @@ export function RoomBooking({ room }: { room: Resource }) {
                 )}
                 {hasConflict && (
                   <p className="text-sm text-red-600">
-                    Sorry, this room is already booked for part of that
-                    range ({occupiedDates.join(", ")}). Try different
-                    dates.
+                    Sorry, this room is already booked for those dates ({occupiedDates.join(", ")}). Select another to continue. 
                   </p>
                 )}
 
@@ -847,7 +847,7 @@ export function RoomBooking({ room }: { room: Resource }) {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={`/images/rooms/${photos.folder}/${String(imageIndex + 1).padStart(2, "0")}.jpg`}
+              src={photos[imageIndex]}
               alt={`${room.label} photo ${imageIndex + 1}, full size`}
               fill
               className="object-contain"

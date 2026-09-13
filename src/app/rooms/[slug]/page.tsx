@@ -26,5 +26,17 @@ export default async function RoomPage({
     notFound();
   }
 
-  return <RoomBooking room={room} />;
+  const { data: photoRows } = await supabase
+    .from("resource_photos")
+    .select("storage_path")
+    .eq("resource_id", room.id)
+    .order("display_order", { ascending: true });
+
+  const photos = (photoRows ?? []).map(
+    (row) =>
+      supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
+        .data.publicUrl
+  );
+
+  return <RoomBooking room={room} photos={photos} />;
 }
