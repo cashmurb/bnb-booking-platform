@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
+import { ROOM_COVER_PHOTOS } from "@/lib/room-photos";
 import { getRooms } from "../guest-actions";
 import { GuestFooter } from "../guest-footer";
 import { ChatWidget } from "../chat-widget";
@@ -19,22 +20,6 @@ export default async function RoomsPage() {
 
   const rooms = await getRooms();
 
-  const { data: photoRows } = await supabase
-    .from("resource_photos")
-    .select("resource_id, storage_path, display_order")
-    .order("display_order", { ascending: true });
-
-  const coverPhotoByResourceId = new Map<string, string>();
-  for (const row of photoRows ?? []) {
-    if (!coverPhotoByResourceId.has(row.resource_id)) {
-      coverPhotoByResourceId.set(
-        row.resource_id,
-        supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
-          .data.publicUrl
-      );
-    }
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
@@ -46,13 +31,12 @@ export default async function RoomsPage() {
 
         {rooms.length === 0 ? (
           <p className="mx-auto max-w-[900px] px-6 text-sm text-guest-muted">
-            No rooms are available to book online right now — please
-            reach out to us directly.
+            No rooms are available to book online right now. Please reach out to us directly.
           </p>
         ) : (
           <div className="mx-auto mb-16 grid max-w-[900px] grid-cols-1 gap-x-10 gap-y-8 px-6 sm:grid-cols-2">
             {rooms.map((room) => {
-              const coverPhoto = coverPhotoByResourceId.get(room.id);
+              const coverPhoto = ROOM_COVER_PHOTOS[room.label];
               return (
                 <Link
                   key={room.id}

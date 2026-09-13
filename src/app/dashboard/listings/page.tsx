@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ROOM_COVER_PHOTOS } from "@/lib/room-photos";
 import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 
@@ -31,22 +32,6 @@ export default async function ListingsPage() {
     .select("id, label, is_active, nightly_rate_php")
     .in("type", ["room_2br", "room_studio"])
     .order("label");
-
-  const { data: photoRows } = await supabase
-    .from("resource_photos")
-    .select("resource_id, storage_path, display_order")
-    .order("display_order", { ascending: true });
-
-  const coverPhotoByResourceId = new Map<string, string>();
-  for (const row of photoRows ?? []) {
-    if (!coverPhotoByResourceId.has(row.resource_id)) {
-      coverPhotoByResourceId.set(
-        row.resource_id,
-        supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
-          .data.publicUrl
-      );
-    }
-  }
 
   return (
     <main className="px-10 py-6">
@@ -82,7 +67,7 @@ export default async function ListingsPage() {
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
         {(rooms ?? []).map((r) => {
-          const coverPhoto = coverPhotoByResourceId.get(r.id);
+          const coverPhoto = ROOM_COVER_PHOTOS[r.label];
           return (
             <div
               key={r.id}
@@ -133,3 +118,4 @@ export default async function ListingsPage() {
     </main>
   );
 }
+
