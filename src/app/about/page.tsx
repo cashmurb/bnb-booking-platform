@@ -29,10 +29,6 @@ export default async function AboutPage() {
           </p>
         </div>
 
-        <div className="mx-auto mb-14 max-w-[800px] px-6">
-          <div className="h-[320px] w-full rounded-md border border-guest-border bg-guest-band" />
-        </div>
-
         <section className="mx-auto mb-14 max-w-[800px] px-6">
           <h2 className="mb-3 text-[20px] font-normal text-guest-ink">
             Our Story
@@ -43,7 +39,7 @@ export default async function AboutPage() {
           </p>
         </section>
 
-        <div className="mx-auto mb-14 grid max-w-[800px] grid-cols-1 gap-8 px-6 sm:grid-cols-2">
+        <div className="mx-auto mb-16 grid max-w-[800px] grid-cols-1 gap-8 px-6 sm:grid-cols-2">
           <div>
             <h3 className="mb-2 text-[16px] font-normal text-guest-ink">
               Our Mission
@@ -61,17 +57,6 @@ export default async function AboutPage() {
             </p>
           </div>
         </div>
-
-        <section className="mx-auto mb-16 max-w-[800px] px-6">
-          <h2 className="mb-5 text-[20px] font-normal text-guest-ink">
-            Where To Find Us
-          </h2>
-          <p className="text-[12px] leading-relaxed text-guest-muted">
-            Mactan Island, Lapu-Lapu City, Philippines
-            <br />
-            2-Bedroom Unit, Studio Unit A, Studio Unit B
-          </p>
-        </section>
       </main>
 
       <GuestFooter maxWidthClassName="max-w-[800px]" />
