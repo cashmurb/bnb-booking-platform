@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { uploadResourcePhoto, deleteResourcePhoto } from "./photo-actions";
+import { uploadResourcePhotos, deleteResourcePhoto } from "./photo-actions";
 
 type CarouselPhoto = {
   src: string;
@@ -42,11 +42,24 @@ export function PhotoCarousel({
   function handleUpload(formData: FormData) {
     setUploadError(null);
     startTransition(async () => {
-      const result = await uploadResourcePhoto(resourceId, formData);
-      if (result.error) {
-        setUploadError(result.error);
-      } else {
+      const result = await uploadResourcePhotos(resourceId, formData);
+
+      if (result.errors.length === 0) {
+        // Every file in the batch succeeded — nothing to show.
         if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      const failedNames = result.errors
+        .map((e) => (e.fileName ? `${e.fileName} (${e.message})` : e.message))
+        .join(", ");
+
+      if (result.uploadedCount > 0) {
+        setUploadError(
+          `${result.uploadedCount} photo(s) uploaded. ${result.errors.length} failed: ${failedNames}`
+        );
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      } else {
+        setUploadError(failedNames);
       }
     });
   }
@@ -74,19 +87,17 @@ export function PhotoCarousel({
 
   return (
     <div className="mb-6">
-      <div className="relative mb-3 w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
+      <div className="relative mb-3 h-[300px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
         {current ? (
           <Image
             src={current.src}
             alt={`${resourceLabel} photo ${index + 1}`}
-            width={0}
-            height={0}
-            sizes="(max-width: 768px) 100vw, 720px"
-            className="h-auto max-h-[70vh] w-full object-contain"
-            priority={index === 0}
+            fill
+            className="object-cover"
+            sizes="720px"
           />
         ) : (
-          <div className="flex aspect-video w-full items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center">
             <span className="text-xs text-guest-muted">
               No photos yet — upload one below.
             </span>
@@ -147,6 +158,7 @@ export function PhotoCarousel({
           type="file"
           name="photo"
           accept="image/jpeg,image/png,image/webp"
+          multiple
           required
           className="text-xs text-guest-muted file:mr-3 file:rounded-md file:border file:border-guest-border file:bg-white file:px-3 file:py-1.5 file:text-xs file:text-guest-ink"
         />
@@ -162,8 +174,7 @@ export function PhotoCarousel({
         <p className="mt-1.5 text-xs text-red-600">{uploadError}</p>
       )}
       <p className="mt-1.5 text-xs text-guest-muted">
-        JPEG, PNG, or WebP, up to 8MB. Uploaded photos can be deleted from
-        here; the original set can&apos;t.
+        Select multiple at once (Ctrl/Cmd-click, or Shift-click for a range). JPEG, PNG, or WebP, up to 8MB each. Uploaded photos can be deleted from here; the original set can&apos;t.
       </p>
     </div>
   );

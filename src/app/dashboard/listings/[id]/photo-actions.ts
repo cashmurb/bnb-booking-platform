@@ -5,13 +5,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export type PhotoActionResult = { error: string | null };
 
+export type UploadPhotosResult = {
+  uploadedCount: number;
+  errors: { fileName: string; message: string }[];
+};
+
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024; // 8MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export async function uploadResourcePhoto(
+export async function uploadResourcePhotos(
   resourceId: string,
   formData: FormData
-): Promise<PhotoActionResult> {
+): Promise<UploadPhotosResult> {
   const supabase = await createClient();
 
   const {
@@ -19,7 +24,7 @@ export async function uploadResourcePhoto(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not signed in." };
+    return { uploadedCount: 0, errors: [{ fileName: "", message: "Not signed in." }] };
   }
 
   const { data: callerProfile } = await supabase
@@ -29,32 +34,20 @@ export async function uploadResourcePhoto(
     .single();
 
   if (callerProfile?.role !== "owner") {
-    return { error: "Only the Owner can upload photos." };
+    return {
+      uploadedCount: 0,
+      errors: [{ fileName: "", message: "Only the Owner can upload photos." }],
+    };
   }
 
-  const file = formData.get("photo") as File | null;
+  const files = formData.getAll("photo") as File[];
+  const realFiles = files.filter((f) => f && f.size > 0);
 
-  if (!file || file.size === 0) {
-    return { error: "Choose a photo to upload." };
-  }
-
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return { error: "Only JPEG, PNG, or WebP images are allowed." };
-  }
-
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    return { error: "Photo must be smaller than 8MB." };
-  }
-
-  const extension = file.name.split(".").pop() ?? "jpg";
-  const storagePath = `${resourceId}/${crypto.randomUUID()}.${extension}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("room-photos")
-    .upload(storagePath, file, { contentType: file.type });
-
-  if (uploadError) {
-    return { error: uploadError.message };
+  if (realFiles.length === 0) {
+    return {
+      uploadedCount: 0,
+      errors: [{ fileName: "", message: "Choose at least one photo to upload." }],
+    };
   }
 
   const { count } = await supabase
@@ -62,19 +55,54 @@ export async function uploadResourcePhoto(
     .select("id", { count: "exact", head: true })
     .eq("resource_id", resourceId);
 
-  const { error: dbError } = await supabase.from("resource_photos").insert({
-    resource_id: resourceId,
-    storage_path: storagePath,
-    display_order: count ?? 0,
-  });
+  let nextDisplayOrder = count ?? 0;
+  let uploadedCount = 0;
+  const errors: { fileName: string; message: string }[] = [];
 
-  if (dbError) {
-    await supabase.storage.from("room-photos").remove([storagePath]);
-    return { error: dbError.message };
+  for (const file of realFiles) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      errors.push({ fileName: file.name, message: "Not a JPEG, PNG, or WebP image." });
+      continue;
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      errors.push({ fileName: file.name, message: "Larger than 8MB." });
+      continue;
+    }
+
+    const extension = file.name.split(".").pop() ?? "jpg";
+    const storagePath = `${resourceId}/${crypto.randomUUID()}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("room-photos")
+      .upload(storagePath, file, { contentType: file.type });
+
+    if (uploadError) {
+      errors.push({ fileName: file.name, message: uploadError.message });
+      continue;
+    }
+
+    const { error: dbError } = await supabase.from("resource_photos").insert({
+      resource_id: resourceId,
+      storage_path: storagePath,
+      display_order: nextDisplayOrder,
+    });
+
+    if (dbError) {
+      await supabase.storage.from("room-photos").remove([storagePath]);
+      errors.push({ fileName: file.name, message: dbError.message });
+      continue;
+    }
+
+    nextDisplayOrder++;
+    uploadedCount++;
   }
 
-  revalidatePath(`/dashboard/listings/${resourceId}`);
-  return { error: null };
+  if (uploadedCount > 0) {
+    revalidatePath(`/dashboard/listings/${resourceId}`);
+  }
+
+  return { uploadedCount, errors };
 }
 
 export async function deleteResourcePhoto(
