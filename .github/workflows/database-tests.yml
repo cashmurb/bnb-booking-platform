@@ -8,36 +8,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      PGHOST: localhost
-      PGPORT: 5432
-      PGUSER: postgres
-      PGPASSWORD: postgres
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pgTAP
+      - name: Install Postgres and pgTAP
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-16-pgtap
+          sudo apt-get install -y postgresql-16 postgresql-16-pgtap
+          sudo systemctl start postgresql
 
       - name: Set up test database
-        run: PGDATABASE=wnj_test bash supabase/tests/setup.sh
+        run: sudo -u postgres bash -c "PGDATABASE=wnj_test bash supabase/tests/setup.sh"
 
       - name: Run database tests
-        run: pg_prove -d wnj_test supabase/tests/database/*.test.sql
+        run: sudo -u postgres bash -c "pg_prove -d wnj_test supabase/tests/database/*.test.sql"
