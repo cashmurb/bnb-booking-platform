@@ -87,17 +87,19 @@ export function PhotoCarousel({
 
   return (
     <div className="mb-6">
-      <div className="relative mb-3 h-[300px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
+      <div className="relative mb-3 w-full overflow-hidden rounded-md border border-guest-border bg-guest-band">
         {current ? (
           <Image
             src={current.src}
             alt={`${resourceLabel} photo ${index + 1}`}
-            fill
-            className="object-cover"
-            sizes="720px"
+            width={0}
+            height={0}
+            sizes="(max-width: 768px) 100vw, 720px"
+            className="h-auto max-h-[70vh] w-full object-contain"
+            priority={index === 0}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
+          <div className="flex aspect-video w-full items-center justify-center">
             <span className="text-xs text-guest-muted">
               No photos yet — upload one below.
             </span>
