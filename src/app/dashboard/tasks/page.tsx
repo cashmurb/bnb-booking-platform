@@ -43,14 +43,12 @@ export default async function TasksPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
   const isOwner = profile?.role === "owner";
 
-  // Both Owner and Staff can be here — RLS on `tasks` already allows
-  // both roles, so no role redirect needed, unlike /dashboard/bookings.
   const { data: tasks, error } = await supabase
     .from("tasks")
     .select(
@@ -80,6 +78,13 @@ export default async function TasksPage() {
           )}
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role={profile?.role ?? "unknown"}
           />
         </div>

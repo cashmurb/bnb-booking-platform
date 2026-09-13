@@ -37,7 +37,7 @@ export default async function ArchivedBookingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -74,6 +74,13 @@ export default async function ArchivedBookingsPage() {
           </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role="Owner"
           />
         </div>
@@ -151,9 +158,6 @@ export default async function ArchivedBookingsPage() {
                   <ArchiveButton bookingId={b.id} mode="unarchive" />
                 </div>
 
-                {/* Mobile: same stacked-card treatment as the main
-                    Bookings list — see that page's comment for the
-                    full reasoning. */}
                 <div className="p-4 lg:hidden">
                   <Link href={`/dashboard/bookings/${b.id}`} className="block">
                     <div className="flex items-start justify-between gap-2">

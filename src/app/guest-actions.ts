@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { sendBookingConfirmationEmail } from "@/lib/booking-emails";
 import type {
   Resource,
   DriverWindow,
@@ -127,6 +128,8 @@ export async function syncHold(input: SyncHoldInput): Promise<SyncHoldResult> {
   };
 }
 
+/** Explicit "start over" — the guest abandoning their booking entirely,
+ * not just changing one selection (that's syncHold's job). */
 export async function releaseCurrentHold(): Promise<void> {
   const supabase = await createClient();
   const cookieStore = await cookies();
@@ -137,7 +140,6 @@ export async function releaseCurrentHold(): Promise<void> {
   }
   cookieStore.delete(HOLD_COOKIE);
 }
-
 export async function updateHoldDetails(input: {
   guestEmail: string;
   notes?: string;
@@ -194,6 +196,39 @@ export async function confirmCurrentHold(): Promise<ConfirmResult> {
   }
 
   cookieStore.delete(HOLD_COOKIE);
+
+  type BookingWithDetails = {
+    guest_name: string;
+    guest_email: string | null;
+    final_total_php: number | null;
+    resource_bookings: {
+      start_date: string;
+      end_date: string;
+      resources: { label: string } | null;
+    }[];
+  };
+
+  const { data: bookingDetailsRaw } = await supabase
+    .from("bookings")
+    .select(
+      "guest_name, guest_email, final_total_php, resource_bookings(start_date, end_date, resources(label))"
+    )
+    .eq("id", data.id)
+    .single();
+
+  const bookingDetails = bookingDetailsRaw as unknown as BookingWithDetails | null;
+
+  if (bookingDetails) {
+    const rb = bookingDetails.resource_bookings?.[0];
+    await sendBookingConfirmationEmail({
+      guestName: bookingDetails.guest_name,
+      guestEmail: bookingDetails.guest_email,
+      roomLabel: rb?.resources?.label ?? "your room",
+      startDate: rb?.start_date ?? "",
+      endDate: rb?.end_date ?? "",
+      totalPhp: bookingDetails.final_total_php,
+    });
+  }
 
   return { success: true, bookingId: data.id, error: null };
 }

@@ -551,7 +551,7 @@ export function RoomBooking({ room }: { room: Resource }) {
         </Link>
 
         <div
-          className="relative mb-8 mt-4 h-[300px] w-full overflow-hidden rounded-md border border-guest-border bg-guest-band"
+          className="relative mb-8 mt-4 w-full overflow-hidden rounded-md border border-guest-border bg-guest-band"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
@@ -560,13 +560,15 @@ export function RoomBooking({ room }: { room: Resource }) {
               type="button"
               onClick={() => setIsLightboxOpen(true)}
               aria-label="View full-size photo"
-              className="group relative h-full w-full cursor-zoom-in"
+              className="group relative block h-full w-full cursor-zoom-in"
             >
               <Image
                 src={`/images/rooms/${photos.folder}/${String(imageIndex + 1).padStart(2, "0")}.jpg`}
                 alt={`${room.label} photo ${imageIndex + 1}`}
-                fill
-                className="object-cover"
+                width={0}
+                height={0}
+                sizes="(max-width: 1024px) 100vw, 900px"
+                className="h-auto max-h-[70vh] w-full object-contain"
                 priority={imageIndex === 0}
               />
               <span className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -574,7 +576,7 @@ export function RoomBooking({ room }: { room: Resource }) {
               </span>
             </button>
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="flex aspect-video w-full items-center justify-center">
               <span className="text-xs text-guest-muted">
                 Photos coming soon
               </span>

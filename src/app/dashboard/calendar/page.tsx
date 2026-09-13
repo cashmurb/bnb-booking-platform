@@ -30,7 +30,7 @@ export default async function CalendarPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -68,6 +68,13 @@ export default async function CalendarPage({
           </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role="Owner"
           />
         </div>
@@ -143,7 +150,7 @@ export default async function CalendarPage({
                         </span>
                       ))}
                     </div>
-                    
+
                     {bookingsToday.length > 0 && (
                       <div className="mt-1 flex gap-0.5 lg:hidden">
                         {bookingsToday.slice(0, 3).map((b, idx) => (

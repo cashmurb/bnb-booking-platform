@@ -36,7 +36,7 @@ export default async function RecordsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -71,6 +71,13 @@ export default async function RecordsPage() {
           </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role="Owner"
           />
         </div>
@@ -136,6 +143,7 @@ export default async function RecordsPage() {
                     )}
                   </span>
                 </div>
+
                 <div className="p-4 lg:hidden">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-medium text-guest-ink">
@@ -167,3 +175,4 @@ export default async function RecordsPage() {
     </main>
   );
 }
+

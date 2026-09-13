@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ROOM_PHOTOS } from "@/lib/room-photos";
 import { ListingForm } from "./listing-form";
+import { PhotoCarousel } from "./photo-carousel";
 
 export default async function ListingDetailPage({
   params,
@@ -44,7 +44,31 @@ export default async function ListingDetailPage({
     notFound();
   }
 
-  const photos = ROOM_PHOTOS[resource.label];
+  const staticPhotos = ROOM_PHOTOS[resource.label];
+
+  const { data: uploadedPhotoRows } = await supabase
+    .from("resource_photos")
+    .select("id, storage_path")
+    .eq("resource_id", id)
+    .order("display_order", { ascending: true });
+
+  // Static photos first, then uploads — new additions append after
+  // the existing reference set rather than jumping ahead of it.
+  const combinedPhotos = [
+    ...(staticPhotos
+      ? Array.from({ length: staticPhotos.count }).map((_, i) => ({
+          src: `/images/rooms/${staticPhotos.folder}/${String(i + 1).padStart(2, "0")}.jpg`,
+          deletable: false as const,
+        }))
+      : []),
+    ...(uploadedPhotoRows ?? []).map((row) => ({
+      src: supabase.storage.from("room-photos").getPublicUrl(row.storage_path)
+        .data.publicUrl,
+      deletable: true as const,
+      photoId: row.id,
+      storagePath: row.storage_path,
+    })),
+  ];
 
   return (
     <main className="mx-auto max-w-[720px] px-10 py-6">
@@ -56,34 +80,11 @@ export default async function ListingDetailPage({
         Edit Listing
       </h1>
 
-      <div className="mb-6">
-        <h2 className="mb-2 text-sm font-semibold text-guest-ink">Photos</h2>
-        {photos ? (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {Array.from({ length: photos.count }).map((_, i) => (
-              <div
-                key={i}
-                className="relative aspect-square overflow-hidden rounded-md bg-guest-band"
-              >
-                <Image
-                  src={`/images/rooms/${photos.folder}/${String(i + 1).padStart(2, "0")}.jpg`}
-                  alt={`${resource.label} photo ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="120px"
-                />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-guest-muted">
-            No photos uploaded for this room yet.
-          </p>
-        )}
-        <p className="mt-2 text-xs text-guest-muted">
-          Reference only — there&apos;s no upload tool here yet. These are the same photos guests see on this room&apos;s page.
-        </p>
-      </div>
+      <PhotoCarousel
+        resourceId={id}
+        resourceLabel={resource.label}
+        initialPhotos={combinedPhotos}
+      />
 
       <ListingForm resource={resource} />
     </main>

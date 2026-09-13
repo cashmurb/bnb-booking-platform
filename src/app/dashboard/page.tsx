@@ -19,7 +19,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -82,6 +82,13 @@ export default async function DashboardPage() {
           )}
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role={profile?.role ?? "unknown"}
           />
         </div>
@@ -90,7 +97,7 @@ export default async function DashboardPage() {
       <div
         className={`mb-5 grid grid-cols-1 gap-5 ${isOwner ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
       >
-        <div className="min-h-[140px] rounded-[10px] bg-[#f5f5f5] p-5">
+        <div className="min-h-[100px] rounded-[10px] border border-white/60 bg-white/60 p-5 shadow-sm backdrop-blur-md lg:min-h-[140px] lg:border-none lg:bg-[#f5f5f5] lg:shadow-none lg:backdrop-blur-none">
           <h3 className="mb-2 text-[18px] font-normal text-guest-ink">
             Active Bookings
           </h3>
@@ -98,7 +105,7 @@ export default async function DashboardPage() {
             {metrics?.active_bookings ?? 0}
           </p>
         </div>
-        <div className="min-h-[140px] rounded-[10px] bg-[#f5f5f5] p-5">
+        <div className="min-h-[100px] rounded-[10px] border border-white/60 bg-white/60 p-5 shadow-sm backdrop-blur-md lg:min-h-[140px] lg:border-none lg:bg-[#f5f5f5] lg:shadow-none lg:backdrop-blur-none">
           <h3 className="mb-2 text-[18px] font-normal text-guest-ink">
             Upcoming Check-ins
           </h3>
@@ -108,7 +115,7 @@ export default async function DashboardPage() {
           <p className="mt-1 text-xs text-guest-muted">Next 7 days</p>
         </div>
         {isOwner && (
-          <div className="min-h-[140px] rounded-[10px] bg-[#f5f5f5] p-5">
+          <div className="min-h-[100px] rounded-[10px] border border-white/60 bg-white/60 p-5 shadow-sm backdrop-blur-md lg:min-h-[140px] lg:border-none lg:bg-[#f5f5f5] lg:shadow-none lg:backdrop-blur-none">
             <h3 className="mb-2 text-[18px] font-normal text-guest-ink">
               Monthly Occupancy Rate
             </h3>
@@ -176,7 +183,7 @@ export default async function DashboardPage() {
       </div>
 
       {isOwner && reviews.length > 0 && (
-        <div className="mt-5 rounded-[10px] bg-[#f5f5f5] p-5">
+        <div className="mt-5 rounded-[10px] border border-white/60 bg-white/60 p-5 shadow-sm backdrop-blur-md lg:border-none lg:bg-[#f5f5f5] lg:shadow-none lg:backdrop-blur-none">
           <h3 className="mb-3 text-[18px] font-normal text-guest-ink">
             Pending Reviews
           </h3>

@@ -38,7 +38,7 @@ export default async function ReportsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -74,12 +74,8 @@ export default async function ReportsPage() {
   const firstOfThisMonth = new Date(curYear, curMonthIndex, 1);
   const nextMonthStart = new Date(curYear, curMonthIndex + 1, 1);
 
-  // Revenue by check-in month, verified bookings only.
   const revenueByMonth = new Map<string, number>();
-  // Bookings count this month (by check-in date).
   let bookingsThisMonth = 0;
-  // Nights booked per room, clamped to the current month (ALL
-  // confirmed bookings — occupancy isn't about payment status).
   const nightsByRoom = new Map<string, number>();
 
   for (const b of bookings) {
@@ -153,6 +149,13 @@ export default async function ReportsPage() {
           </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role="Owner"
           />
         </div>

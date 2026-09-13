@@ -28,10 +28,6 @@ export function ListingForm({ resource }: { resource: Resource }) {
 
   return (
     <div className="rounded-[14px] bg-white p-6">
-      <div className="mb-5 flex h-[220px] items-center justify-center rounded-[10px] bg-guest-band text-sm text-guest-muted">
-        Main photo
-      </div>
-
       <form action={formAction} className="flex flex-col gap-4">
         <div>
           <label className="mb-2 block text-xs text-[#4a4a4a]">

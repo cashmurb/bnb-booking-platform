@@ -19,7 +19,7 @@ export default async function ListingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, avatar_path")
     .eq("id", user.id)
     .single();
 
@@ -49,6 +49,13 @@ export default async function ListingsPage() {
           </div>
           <ProfileMenu
             name={profile?.full_name ?? user.email ?? "Account"}
+            avatarUrl={
+              profile?.avatar_path
+                ? supabase.storage
+                    .from("avatars")
+                    .getPublicUrl(profile.avatar_path).data.publicUrl
+                : null
+            }
             role="Owner"
           />
         </div>
@@ -111,3 +118,4 @@ export default async function ListingsPage() {
     </main>
   );
 }
+
