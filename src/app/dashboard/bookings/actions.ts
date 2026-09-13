@@ -6,7 +6,6 @@ import { sendCancellationEmail } from "@/lib/booking-emails";
 
 export async function cancelBooking(bookingId: string, reason: string) {
   const supabase = await createClient();
-
   type BookingWithDetails = {
     guest_name: string;
     guest_email: string | null;

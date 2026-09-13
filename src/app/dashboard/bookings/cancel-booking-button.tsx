@@ -32,7 +32,9 @@ export function CancelBookingButton({
   return (
     <div className="mt-2 rounded-md border border-red-200 bg-red-50 p-3">
       <p className="text-sm text-red-800">
-        Cancel {guestName}&apos;s booking? This immediately frees the room/vehicle and driver slot for other bookings. This can&apos;t be undone.
+        Cancel {guestName}&apos;s booking? This immediately frees the
+        room/vehicle and driver slot for other bookings. This can&apos;t be
+        undone.
       </p>
       <label className="mb-1 mt-2 block text-xs font-medium text-red-800">
         Reason (sent to the guest by email)
@@ -40,7 +42,7 @@ export function CancelBookingButton({
       <textarea
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        placeholder="e.g. Property closed due to unforseen events. We're so sorry for the inconvenience."
+        placeholder="e.g. Property closed due to typhoon damage — we're so sorry for the inconvenience."
         rows={2}
         className="w-full rounded-md border border-red-200 px-2 py-1.5 text-sm focus:border-red-400 focus:outline-none"
       />

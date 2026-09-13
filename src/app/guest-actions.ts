@@ -128,8 +128,6 @@ export async function syncHold(input: SyncHoldInput): Promise<SyncHoldResult> {
   };
 }
 
-/** Explicit "start over" — the guest abandoning their booking entirely,
- * not just changing one selection (that's syncHold's job). */
 export async function releaseCurrentHold(): Promise<void> {
   const supabase = await createClient();
   const cookieStore = await cookies();
@@ -140,6 +138,7 @@ export async function releaseCurrentHold(): Promise<void> {
   }
   cookieStore.delete(HOLD_COOKIE);
 }
+
 export async function updateHoldDetails(input: {
   guestEmail: string;
   notes?: string;
