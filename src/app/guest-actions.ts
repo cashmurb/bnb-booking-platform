@@ -182,6 +182,16 @@ export async function confirmCurrentHold(): Promise<ConfirmResult> {
     };
   }
 
+  type ConfirmedBookingDetails = {
+    id: string;
+    guest_name: string;
+    guest_email: string | null;
+    final_total_php: number | null;
+    room_label: string | null;
+    start_date: string | null;
+    end_date: string | null;
+  };
+
   const { data, error } = await supabase.rpc("confirm_guest_hold", {
     p_booking_id: existingHoldId,
   });
@@ -194,40 +204,18 @@ export async function confirmCurrentHold(): Promise<ConfirmResult> {
     };
   }
 
+  const booking = data as unknown as ConfirmedBookingDetails;
+
   cookieStore.delete(HOLD_COOKIE);
 
-  type BookingWithDetails = {
-    guest_name: string;
-    guest_email: string | null;
-    final_total_php: number | null;
-    resource_bookings: {
-      start_date: string;
-      end_date: string;
-      resources: { label: string } | null;
-    }[];
-  };
+  await sendBookingConfirmationEmail({
+    guestName: booking.guest_name,
+    guestEmail: booking.guest_email,
+    roomLabel: booking.room_label ?? "your room",
+    startDate: booking.start_date ?? "",
+    endDate: booking.end_date ?? "",
+    totalPhp: booking.final_total_php,
+  });
 
-  const { data: bookingDetailsRaw } = await supabase
-    .from("bookings")
-    .select(
-      "guest_name, guest_email, final_total_php, resource_bookings(start_date, end_date, resources(label))"
-    )
-    .eq("id", data.id)
-    .single();
-
-  const bookingDetails = bookingDetailsRaw as unknown as BookingWithDetails | null;
-
-  if (bookingDetails) {
-    const rb = bookingDetails.resource_bookings?.[0];
-    await sendBookingConfirmationEmail({
-      guestName: bookingDetails.guest_name,
-      guestEmail: bookingDetails.guest_email,
-      roomLabel: rb?.resources?.label ?? "your room",
-      startDate: rb?.start_date ?? "",
-      endDate: rb?.end_date ?? "",
-      totalPhp: bookingDetails.final_total_php,
-    });
-  }
-
-  return { success: true, bookingId: data.id, error: null };
+  return { success: true, bookingId: booking.id, error: null };
 }
