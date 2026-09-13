@@ -45,6 +45,7 @@ export default async function BookingDetailPage({
     guest_email: string | null;
     payment_method: string | null;
     guest_count: number | null;
+    notes: string | null;
     calculated_total_php: number | null;
     final_total_php: number | null;
     resource_bookings: {
@@ -68,7 +69,7 @@ export default async function BookingDetailPage({
     .from("bookings")
     .select(
       `
-      id, status, guest_name, guest_contact, guest_email, payment_method, guest_count,
+      id, status, guest_name, guest_contact, guest_email, payment_method, guest_count, notes,
       calculated_total_php, final_total_php,
       resource_bookings (
         start_date, end_date,
@@ -159,6 +160,17 @@ export default async function BookingDetailPage({
           </div>
         </div>
       </div>
+
+      {booking.notes && (
+        <div className="mb-5 rounded-[14px] bg-white p-6">
+          <h3 className="mb-3 text-base font-normal text-guest-ink">
+            Special Requests
+          </h3>
+          <p className="whitespace-pre-wrap text-[13px] text-guest-ink">
+            {booking.notes}
+          </p>
+        </div>
+      )}
 
       <div className="mb-5 rounded-[14px] bg-white p-6">
         <h3 className="mb-4 text-base font-normal text-guest-ink">Stay</h3>

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 import { ArchiveButton } from "./archive-button";
+import { NoteIcon } from "../../icons";
 
 const STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-[#e6f4ea] text-[#1e7d3c]",
@@ -16,6 +17,7 @@ type BookingRow = {
   id: string;
   status: string;
   guest_name: string;
+  notes: string | null;
   final_total_php: number | null;
   resource_bookings: {
     start_date: string;
@@ -56,7 +58,7 @@ export default async function BookingsPage({
     .from("bookings")
     .select(
       `
-      id, status, guest_name, final_total_php,
+      id, status, guest_name, notes, final_total_php,
       resource_bookings ( start_date, end_date, resources ( label ) )
     `
     )
@@ -174,7 +176,14 @@ export default async function BookingsPage({
                     href={`/dashboard/bookings/${b.id}`}
                     className="contents"
                   >
-                    <span className="font-medium">{b.guest_name}</span>
+                    <span className="flex items-center gap-1.5 font-medium">
+                      {b.guest_name}
+                      {b.notes && (
+                        <NoteIcon
+                          className="h-3.5 w-3.5 flex-none text-guest-muted"
+                        />
+                      )}
+                    </span>
                     <span className="text-guest-muted">
                       {rb?.resources?.label ?? "—"}
                     </span>
@@ -190,8 +199,13 @@ export default async function BookingsPage({
                 <div className="p-4 lg:hidden">
                   <Link href={`/dashboard/bookings/${b.id}`} className="block">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-medium text-guest-ink">
+                      <span className="flex items-center gap-1.5 font-medium text-guest-ink">
                         {b.guest_name}
+                        {b.notes && (
+                          <NoteIcon
+                            className="h-3.5 w-3.5 flex-none text-guest-muted"
+                          />
+                        )}
                       </span>
                       <span className="flex-none">{statusBadge}</span>
                     </div>
