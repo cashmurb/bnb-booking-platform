@@ -66,18 +66,18 @@ In the Supabase dashboard: **SQL Editor → New query**. Run each file in `supab
 0016_tambuli_future_room.sql
 0017_dashboard_metrics.sql
 0018_task_in_progress.sql
-0019_dashboard_metrics_in_progress_fix.sql
+0019_dashboard_progress_fix.sql
 0020_guest_email.sql
 0021_payment_verification.sql
 0022_reviews.sql
 0023_booking_archive.sql
+0024_deactivate_staff.sql
+0025_resource_photos.sql
+0026_avatar_upload.sql
+0027_cancellation_reason.sql
+0028_confirm_returns_details.sql
 
 ```
-
-For `0003`: if `create extension if not exists pg_cron;` fails, go to **Database → Extensions**, enable `pg_cron` there, then re-run just the `select cron.schedule(...)` line from that file on its own.
-
-Already run some of these before? Just run whatever's missing, in order — each one only depends on the ones before it.
-
 ### 3. Set your environment variables
 
 ```bash
@@ -97,11 +97,11 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000` — you'll see the real guest homepage. Go to `/login` for the management side. You won't be able to sign in yet, since no accounts exist — that's next.
+Visit `http://localhost:3000` — you'll see the real guest homepage. Go to `/login` for the management side. 
 
 ### 5. Create the Owner and Staff accounts
 
-There's no public sign-up page anywhere in this app — that's deliberate. Every account is created directly, by you:
+There's no public sign-up page anywhere in this app and that's deliberate. Every account is created directly, by you:
 
 ```bash
 export $(grep -v '^#' .env.local | xargs)
