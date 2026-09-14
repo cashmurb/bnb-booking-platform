@@ -178,8 +178,8 @@ Each `.test.sql` file runs inside its own transaction that rolls back at the end
 ## Project structure
 
 ```
-supabase/migrations/          28 migrations — see the setup section above
-supabase/tests/                database test suite (pgTAP) — see Testing above
+supabase/migrations/          28 migrations 
+supabase/tests/                database test suite (pgTAP) 
 scripts/create-user.mjs        admin script for creating Owner/Staff accounts
 scripts/update-user.mjs        admin script for editing an account's name/role
 scripts/delete-user.mjs        admin script for removing a never-used account
@@ -187,8 +187,7 @@ scripts/migrate-room-photos.mjs one-time script, see setup step 7
 
 src/proxy.ts                   route protection — keeps guests and the
                                 management portal completely separate
-src/lib/supabase/              client.ts, server.ts, middleware.ts, admin.ts —
-                                Supabase connection helpers
+src/lib/supabase/              Supabase connection helpers
 src/lib/resend.ts               shared email-sending client
 src/lib/booking-emails.ts       confirmation and cancellation email templates
 src/lib/stay-phase.ts           derives Upcoming/Currently Staying/Completed
@@ -206,8 +205,7 @@ src/app/reset-password/         set a new password
 src/app/auth/confirm/           handles the email link from a reset request
 
 src/app/dashboard/              the whole management portal — Dashboard,
-                                 Bookings (+ Archive), Listings (+ photos),
-                                 Tasks, Calendar, Records, Reports (+ the
-                                 AI stats assistant), Staff
+                                 Bookings, Listings, Tasks, Calendar, Records,
+                                 Reports, Staff
 ```
 
