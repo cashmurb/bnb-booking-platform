@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CancelBookingButton } from "../cancel-booking-button";
+import { getStayPhase, STAY_PHASE_LABELS, STAY_PHASE_STYLES } from "@/lib/stay-phase";
 
 const STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-[#e6f4ea] text-[#1e7d3c]",
@@ -130,13 +131,22 @@ export default async function BookingDetailPage({
         <h1 className="text-[26px] font-normal text-guest-ink">
           Booking {booking.id.slice(0, 8).toUpperCase()}
         </h1>
-        <span
-          className={`rounded-[10px] px-3 py-1.5 text-xs capitalize ${
-            STATUS_STYLES[booking.status] ?? "bg-stone-100 text-stone-600"
-          }`}
-        >
-          {booking.status}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-[10px] px-3 py-1.5 text-xs capitalize ${
+              STATUS_STYLES[booking.status] ?? "bg-stone-100 text-stone-600"
+            }`}
+          >
+            {booking.status}
+          </span>
+          {booking.status === "confirmed" && rb && (
+            <span
+              className={`rounded-[10px] px-3 py-1.5 text-xs ${STAY_PHASE_STYLES[getStayPhase(rb.start_date, rb.end_date)]}`}
+            >
+              {STAY_PHASE_LABELS[getStayPhase(rb.start_date, rb.end_date)]}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mb-5 rounded-[14px] bg-white p-6">
@@ -261,8 +271,7 @@ export default async function BookingDetailPage({
             </div>
           )}
           <p className="mt-1 text-guest-muted">
-            No online payment taken yet — this reflects a reservation, not
-            a completed charge.
+            No online payment taken yet. This reflects a reservation, not a completed charge.
           </p>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { SearchBar } from "../search-bar";
 import { ProfileMenu } from "../profile-menu";
 import { ArchiveButton } from "./archive-button";
 import { NoteIcon } from "../../icons";
+import { getStayPhase, STAY_PHASE_LABELS, STAY_PHASE_STYLES } from "@/lib/stay-phase";
 
 const STATUS_STYLES: Record<string, string> = {
   confirmed: "bg-[#e6f4ea] text-[#1e7d3c]",
@@ -163,6 +164,14 @@ export default async function BookingsPage({
                 {b.status}
               </span>
             );
+            const stayPhaseBadge =
+              b.status === "confirmed" && rb ? (
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${STAY_PHASE_STYLES[getStayPhase(rb.start_date, rb.end_date)]}`}
+                >
+                  {STAY_PHASE_LABELS[getStayPhase(rb.start_date, rb.end_date)]}
+                </span>
+              ) : null;
             const total =
               b.final_total_php != null
                 ? `₱${Number(b.final_total_php).toFixed(2)}`
@@ -170,7 +179,6 @@ export default async function BookingsPage({
 
             return (
               <div key={b.id} className="border-t border-[#f0f0f2]">
-                {/* Desktop: original table row, unchanged */}
                 <div className="hidden grid-cols-[1.2fr_1fr_1fr_1fr_1fr_auto] items-center px-5 py-3 text-[13px] text-guest-ink hover:bg-[#fafafa] lg:grid">
                   <Link
                     href={`/dashboard/bookings/${b.id}`}
@@ -190,7 +198,10 @@ export default async function BookingsPage({
                     <span className="text-guest-muted">
                       {rb ? `${rb.start_date} → ${rb.end_date}` : "—"}
                     </span>
-                    <span>{statusBadge}</span>
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      {statusBadge}
+                      {stayPhaseBadge}
+                    </span>
                     <span className="font-medium">{total}</span>
                   </Link>
                   <ArchiveButton bookingId={b.id} mode="archive" />
@@ -207,7 +218,10 @@ export default async function BookingsPage({
                           />
                         )}
                       </span>
-                      <span className="flex-none">{statusBadge}</span>
+                      <span className="flex flex-none flex-wrap items-center gap-1.5">
+                        {statusBadge}
+                        {stayPhaseBadge}
+                      </span>
                     </div>
                     <p className="mt-1 text-xs text-guest-muted">
                       {rb?.resources?.label ?? "—"}
