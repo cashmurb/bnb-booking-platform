@@ -176,36 +176,43 @@ Each `.test.sql` file runs inside its own transaction that rolls back at the end
 **Payment processing and refunds.** Guests pick a payment *preference* at checkout, but no real charge happens. This needs a real PayMongo or Xendit merchant account, which only the business owner can set up. 
 
 ## Project structure
-
 ```
-supabase/migrations/          28 migrations 
-supabase/tests/                database test suite (pgTAP) 
-scripts/create-user.mjs        admin script for creating Owner/Staff accounts
-scripts/update-user.mjs        admin script for editing an account's name/role
-scripts/delete-user.mjs        admin script for removing a never-used account
-scripts/migrate-room-photos.mjs one-time script, see setup step 7
-
-src/proxy.ts                   route protection — keeps guests and the
-                                management portal completely separate
-src/lib/supabase/              Supabase connection helpers
-src/lib/resend.ts               shared email-sending client
-src/lib/booking-emails.ts       confirmation and cancellation email templates
-src/lib/stay-phase.ts           derives Upcoming/Currently Staying/Completed
-src/lib/types.ts                shared types matching the database schema
-
-src/app/                       guest-facing pages: Home, Rooms, Room
-                                Detail (booking flow), About,
-                                Cancellation Policy, Leave a Review
-src/app/chat-widget.tsx         the guest FAQ chat widget
-src/app/auth-background.tsx     shared visual background for the auth pages
-
-src/app/login/                  sign-in
-src/app/forgot-password/        request a password reset
-src/app/reset-password/         set a new password
-src/app/auth/confirm/           handles the email link from a reset request
-
-src/app/dashboard/              the whole management portal — Dashboard,
-                                 Bookings, Listings, Tasks, Calendar, Records,
-                                 Reports, Staff
+bnb-booking-platform/
+├── supabase/
+│   ├── migrations/
+│   └── tests/
+│
+├── scripts/
+│   ├── create-user.mjs
+│   ├── update-user.mjs
+│   ├── delete-user.mjs
+│   └── migrate-room-photos.mjs
+│
+├── src/
+│   ├── proxy.ts
+│   │
+│   ├── lib/
+│   │   ├── supabase/
+│   │   ├── resend.ts
+│   │   ├── booking-emails.ts
+│   │   ├── stay-phase.ts
+│   │   └── types.ts
+│   │
+│   └── app/
+│       ├── chat-widget.tsx
+│       ├── auth-background.tsx
+│       ├── login/
+│       ├── forgot-password/
+│       ├── reset-password/
+│       ├── auth/confirm/
+│       └── dashboard/
+│
+├── .github/workflows/
+├── public/
+├── package.json
+├── next.config.ts
+├── tsconfig.json
+├── eslint.config.mjs
+├── postcss.config.mjs
+└── README.md
 ```
-
